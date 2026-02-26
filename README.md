@@ -7,6 +7,3 @@ My addon will attempt to automatically calculate the velocity prior to the selec
 
 By configuring 'timing,' 'decay,' and 'amplitude,' you can create locational or rotational overshoots that are springy, bouncy, or 
 even very short 'jolts.' 
-
-Works excellently in conjunction with 'space switching' techniques. My other addon, 'Instant Physics' automates this process, but
-it can be done manually. 
