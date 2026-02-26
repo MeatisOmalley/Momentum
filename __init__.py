@@ -93,7 +93,7 @@ class VelocityOperator(Operator):
     timing: bpy.props.IntProperty(
         name="Timing",
         description="length of an oscillation",
-        default=5,
+        default=4,
         min=1
     )
     
