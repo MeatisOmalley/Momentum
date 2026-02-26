@@ -10,11 +10,8 @@ def estimate_previous_velocity(fcurve, frame, num_samples=3, std_threshold=0.1, 
         # Rotation curves get no normalization
         if "rotation" in fcurve.data_path:
             return 1.0
-
-        # Everything else gets the simple constant
-        return 0.05
-
-
+        else:
+            return 0.5
 
     current_value = fcurve.evaluate(frame)
 
@@ -60,11 +57,9 @@ def find_keyframe_at_frame(fcurve, frame):
     return None
 
     
-def build_selected_map(fcurves):
-    """
-    Returns:
-        selected_map: { fcurve: [(frame, value)] }
-    """
+def build_selected_map(self, fcurves):
+    #selected_map: { fcurve: [(frame, value)] }
+
     selected_map = {}
 
     for fc in fcurves:
@@ -73,7 +68,7 @@ def build_selected_map(fcurves):
         # Abort PER F-CURVE if more than one keyframe is selected
         if len(selected) > 1:
             self.report({'ERROR'}, "Select exactly one keyframe per fcurve")
-            return {'CANCELLED'}      
+            return None  
 
         # Store exactly one selected keyframe
         if len(selected) == 1:
@@ -127,16 +122,8 @@ class VelocityOperator(Operator):
 
     fake_velocity: bpy.props.BoolProperty(
         name="Fake velocity",
-        description="If you don't have an incoming velocity to calculate, select this to set velocity to a default of 1",
+        description="If you don't have an incoming velocity to calculate, select this to set velocity to a default value",
         default=False
-    )
-    
-    decimation_percentage: bpy.props.FloatProperty(
-        name="Decimation percentage",
-        description="The percentage change you will allow for cleaning up keyframes.",
-        default=0.0,
-        min=0.0,
-        max=10.0
     )
     
     
@@ -161,7 +148,9 @@ class VelocityOperator(Operator):
             self.report({'ERROR'}, "No F-Curves found")
             return {'CANCELLED'}
             
-        map = build_selected_map(fcurves)
+        map = build_selected_map(self, fcurves)
+        if map is None:
+            return {'CANCELLED'}
         for fcurve in fcurves:
 
             # Find selected keyframe
@@ -181,23 +170,6 @@ class VelocityOperator(Operator):
             # Identify owner
             owner = fcurve.id_data
             fcurve_key = f"{fcurve.data_path}_{fcurve.array_index}"
-
-            # Read previous history
-            last_kf = owner.get(f"{fcurve_key}_keyframe", None)
-            last_dur = owner.get(f"{fcurve_key}_duration", None)
-
-            # Delete old baked keys
-            if last_kf is not None and last_dur is not None:
-                end_frame = last_kf + last_dur
-                indices = []
-
-                for i, kp in enumerate(fcurve.keyframe_points):
-                    frame = kp.co[0]
-                    if last_kf < frame <= end_frame:
-                        indices.append(i)
-
-                for i in reversed(indices):
-                    fcurve.keyframe_points.remove(fcurve.keyframe_points[i])
 
             # Spring parameters
             omega = (2 * math.pi) / (self.timing + 1)
@@ -258,35 +230,9 @@ class VelocityOperator(Operator):
             
             if iter_count >= max_iter:
                 self.report({'WARNING'}, "Simulation capped — adjust decay or timing")
-
-
-            # After decimate:
-            # Find the keyframe at kf_frame again
-            new_kf = None
-            for kp in fcurve.keyframe_points:
-                if int(kp.co[0]) == kf_frame:
-                    new_kf = kp
-                    new_kf.select_control_point = False
-                    break
-    
-                  
-            # After baking:
-            owner[f"{fcurve_key}_keyframe"] = kf_frame
-            owner[f"{fcurve_key}_duration"] = (frame - kf_frame)
             
             fcurve.update()
             processed += 1
-        
-     
-        if self.decimation_percentage != 0.00:
-            graph_area = next((a for a in bpy.context.screen.areas if a.type == 'GRAPH_EDITOR'), None)
-            if graph_area:
-                kf.select_control_point = False
-                with bpy.context.temp_override(area=graph_area):
-                    try:
-                        bpy.ops.graph.decimate(mode='ERROR', remove_error_margin=self.decimation_percentage/1000)
-                    except Exception as ex:
-                        print("Decimate failed:", ex)
         
         #for fcurve in fcurves:
         # ─── Final cleanup: deselect + smart handle types ────────────────────────

@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 id = "momentum"
 name = "Momentum"
-version = "1.0.0"
+version = "1.0.1"
 tagline = "quickly add configurable follow-through to animations"
 maintainer = "Isaac Burke (@meatisomalley)"
 type = "add-on"
