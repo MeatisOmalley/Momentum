@@ -1,6 +1,6 @@
 Momementum is a Blender addon that enables you to instantly create pleasing, configurable follow-through for your animations.
 The addon works exclusively on keyframes. this is NOT a viewport simulation. No bake required. 
-To use, select one keyframe per-fcurve, and then select the 'Momentum' submenu and click 'overshoot selected keyframe' 
+To use, select one keyframe per-fcurve, and then select the 'Momentum' submenu within the graph curve, and click 'overshoot selected keyframe' 
 
 My addon will attempt to automatically calculate the velocity prior to the selected keyframe. If you don't want this, select 
 'fake velocity', and it will instead set velocity to a default of 1. 
