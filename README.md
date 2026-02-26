@@ -1,4 +1,4 @@
-Momementum is a Blender addon that enables you to instantly create pleasing, configurable follow-through for your animations.
+Momentum is a Blender addon that enables you to instantly create pleasing, configurable follow-through for your animations.
 The addon works exclusively on keyframes. this is NOT a viewport simulation. No bake required. 
 To use, select one keyframe per-fcurve, and then select the 'Momentum' submenu within the graph curve, and click 'overshoot selected keyframe' 
 
