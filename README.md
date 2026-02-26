@@ -3,7 +3,7 @@ The addon works exclusively on keyframes. this is NOT a viewport simulation. No 
 To use, select one keyframe per-fcurve, and then select the 'Momentum' submenu within the graph curve, and click 'overshoot selected keyframe' 
 
 My addon will attempt to automatically calculate the velocity prior to the selected keyframe. If you don't want this, select 
-'fake velocity', and it will instead set velocity to a default of 1. 
+'fake velocity'
 
 By configuring 'timing,' 'decay,' and 'amplitude,' you can create locational or rotational overshoots that are springy, bouncy, or 
 even very short 'jolts.' 
