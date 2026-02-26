@@ -7,7 +7,14 @@ def estimate_previous_velocity(fcurve, frame, num_samples=3, std_threshold=0.1, 
     # Returns estimated slope of existing keyframe by sampling previous curve
 
     if fake:
-        return 1
+        # Rotation curves get no normalization
+        if "rotation" in fcurve.data_path:
+            return 1.0
+
+        # Everything else gets the simple constant
+        return 0.05
+
+
 
     current_value = fcurve.evaluate(frame)
 
@@ -113,7 +120,7 @@ class VelocityOperator(Operator):
     )    
 
     overwrite_keyframes: bpy.props.BoolProperty(
-        name="Overwrite conflicting keyframes",
+        name="Overwrite keyframes",
         description="Choose whether you are okay with future keyframes being overwritten in your animation.",
         default=True
     )
@@ -122,7 +129,15 @@ class VelocityOperator(Operator):
         name="Fake velocity",
         description="If you don't have an incoming velocity to calculate, select this to set velocity to a default of 1",
         default=False
-    )    
+    )
+    
+    decimation_percentage: bpy.props.FloatProperty(
+        name="Decimation percentage",
+        description="The percentage change you will allow for cleaning up keyframes.",
+        default=0.0,
+        min=0.0,
+        max=10.0
+    )
     
     
     def invoke(self, context, event):
@@ -263,15 +278,15 @@ class VelocityOperator(Operator):
             processed += 1
         
      
-        
-        graph_area = next((a for a in bpy.context.screen.areas if a.type == 'GRAPH_EDITOR'), None)
-        if graph_area:
-            kf.select_control_point = False
-            with bpy.context.temp_override(area=graph_area):
-                try:
-                    bpy.ops.graph.decimate(mode='ERROR', remove_error_margin=0.01)
-                except Exception as ex:
-                    print("Decimate failed:", ex)         
+        if self.decimation_percentage != 0.00:
+            graph_area = next((a for a in bpy.context.screen.areas if a.type == 'GRAPH_EDITOR'), None)
+            if graph_area:
+                kf.select_control_point = False
+                with bpy.context.temp_override(area=graph_area):
+                    try:
+                        bpy.ops.graph.decimate(mode='ERROR', remove_error_margin=self.decimation_percentage/1000)
+                    except Exception as ex:
+                        print("Decimate failed:", ex)
         
         #for fcurve in fcurves:
         # ─── Final cleanup: deselect + smart handle types ────────────────────────
