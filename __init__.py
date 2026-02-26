@@ -3,7 +3,7 @@ from bpy.types import Operator, Panel
 import math
 import statistics  
     
-def estimate_previous_velocity(fcurve, frame, num_samples=3, std_threshold=0.1, fallback=1e-3):
+def estimate_previous_velocity(fcurve, frame, num_samples=3, std_threshold=0.1):
     # Returns estimated slope of existing keyframe by sampling previous curve
 
     current_value = fcurve.evaluate(frame)
@@ -33,7 +33,7 @@ def estimate_previous_velocity(fcurve, frame, num_samples=3, std_threshold=0.1, 
     # Standard deviation check
     slope_std = statistics.pstdev(slopes) if len(slopes) > 1 else 0.0
 
-    if abs(statistics.median(slopes)) > fallback:
+    if not self.fake_velocity:
         # If unstable, return most recent slope (slopes[0])
         if not consistent_sign or slope_std > std_threshold:
             return slopes[0]
@@ -117,6 +117,12 @@ class VelocityOperator(Operator):
         description="Choose whether you are okay with future keyframes being overwritten in your animation.",
         default=True
     )
+
+    fake_velocity: bpy.props.BoolProperty(
+        name="Fake velocity",
+        description="If you don't have an incoming velocity to calculate, select this to set velocity to a default of 1",
+        default=False
+    )    
     
     
     def invoke(self, context, event):
