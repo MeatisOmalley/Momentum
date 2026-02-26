@@ -3,8 +3,11 @@ from bpy.types import Operator, Panel
 import math
 import statistics  
     
-def estimate_previous_velocity(fcurve, frame, num_samples=3, std_threshold=0.1):
+def estimate_previous_velocity(fcurve, frame, num_samples=3, std_threshold=0.1, fake=False):
     # Returns estimated slope of existing keyframe by sampling previous curve
+
+    if fake:
+        return 1
 
     current_value = fcurve.evaluate(frame)
 
@@ -33,15 +36,12 @@ def estimate_previous_velocity(fcurve, frame, num_samples=3, std_threshold=0.1):
     # Standard deviation check
     slope_std = statistics.pstdev(slopes) if len(slopes) > 1 else 0.0
 
-    if not self.fake_velocity:
-        # If unstable, return most recent slope (slopes[0])
-        if not consistent_sign or slope_std > std_threshold:
-            return slopes[0]
-        
-        # Otherwise return median slope
-        return statistics.median(slopes)
-    else:
-        return 1
+    # If unstable, return most recent slope (slopes[0])
+    if not consistent_sign or slope_std > std_threshold:
+        return slopes[0]
+    
+    # Otherwise return median slope
+    return statistics.median(slopes)
     
 def find_keyframe_at_frame(fcurve, frame):
     target = int(frame)
@@ -160,7 +160,7 @@ class VelocityOperator(Operator):
             kf.select_control_point = False            
 
             # Compute velocity at the keyframe
-            velocity = estimate_previous_velocity(fcurve, kf_frame)
+            velocity = estimate_previous_velocity(fcurve, kf_frame, fake=self.fake_velocity)
             velocity *= self.amplitude
             
             # Identify owner
