@@ -1,0 +1,11 @@
+schema_version = "1.0.0"
+id = "momentum"
+name = "Momentum"
+version = "1.0.0"
+tagline = "quickly add configurable follow-through to animations"
+maintainer = "Isaac Burke (@meatisomalley)"
+type = "add-on"
+tags = ["Animation"]
+blender_version_min = "5.0.0"
+license = ["SPDX:GPL-3.0-or-later"]
+copyright = ["2024-2026 Isaac Burke"]
